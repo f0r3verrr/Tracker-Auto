@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { SUGGESTED_NAMES, setReviewerName } from '../lib/identity'
 import { Button, Input, cx } from './ui'
 
@@ -57,6 +58,13 @@ export function WhoAreYou({ onDone }: { onDone: () => void }) {
             Готово
           </Button>
         </form>
+
+        <p className="mt-6 border-t border-line pt-4 text-[13px] text-ink-soft">
+          Это твой сайт?{' '}
+          <Link to="/login" className="text-accent underline-offset-2 hover:underline">
+            Войти как владелец
+          </Link>
+        </p>
       </div>
     </div>
   )
