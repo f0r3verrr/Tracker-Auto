@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Golos Text', ui-sans-serif, system-ui, 'Segoe UI', Roboto, Arial, sans-serif;
+
+  /* Холодная бумага, чтобы фирменные цвета площадок в бейджах не спорили с фоном */
+  --color-paper: #f6f7f8;
+  --color-card: #ffffff;
+  --color-ink: #16202a;
+  --color-ink-soft: #5a6b7a;
+  --color-ink-faint: #8b99a6;
+  --color-line: #e3e7eb;
+  --color-line-strong: #cdd5dc;
+
+  /* Единственный акцент: петрольный. Не зелёный, не красный, не синий — */
+  /* чтобы не читаться как Авито, Auto.ru или Дром */
+  --color-accent: #0b6b63;
+  --color-accent-dark: #085650;
+  --color-accent-soft: #e6f2f0;
+
+  --color-alarm: #b3261e;
+  --color-alarm-soft: #fdecea;
+
+  --radius-card: 0.75rem;
+  --radius-control: 0.5rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-paper text-ink antialiased;
+    font-feature-settings: 'ss01';
+  }
+
+  /* Цифры в колонках цен и метрик должны стоять ровно друг под другом */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-accent-soft);
+  }
+}
+
+@layer components {
+  .card-surface {
+    @apply bg-card border border-line rounded-[var(--radius-card)];
+  }
+
+  .field-label {
+    @apply block text-[13px] font-medium text-ink-soft mb-1.5;
+  }
+
+  .field-input {
+    @apply w-full rounded-[var(--radius-control)] border border-line bg-card px-3 py-2 text-[15px]
+           text-ink placeholder:text-ink-faint
+           focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
