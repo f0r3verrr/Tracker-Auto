@@ -37,7 +37,18 @@ export async function fetchCar(id: string): Promise<Car> {
 }
 
 export async function createCar(input: Partial<CarInput>): Promise<Car> {
-  const { data, error } = await supabase.from('cars').insert(input).select().single()
+  // Начальная цена — первая точка графика. Триггер в базе дописывает только изменения,
+  // поэтому без этой записи история у новой карточки осталась бы пустой.
+  const seed =
+    input.price === null || input.price === undefined
+      ? {}
+      : { price_history: [{ date: new Date().toISOString(), price: input.price }] }
+
+  const { data, error } = await supabase
+    .from('cars')
+    .insert({ ...input, ...seed })
+    .select()
+    .single()
   if (error) throw error
   return normalizeCar(data)
 }
