@@ -46,8 +46,10 @@
     outline-offset: 2px;
   }
 
+  /* Заливка должна быть заметной: очень светлый акцент читался как отсутствие выделения */
   ::selection {
-    background: var(--color-accent-soft);
+    background: #a5d4ce;
+    color: #0d1a1f;
   }
 }
 

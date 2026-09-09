@@ -16,10 +16,13 @@ import {
   WHEEL_OPTIONS,
 } from '../lib/constants'
 import { toDateInput } from '../lib/format'
+import { compressImage } from '../lib/images'
 import { autoRating, findDuplicates } from '../lib/metrics'
 import type { Car, CarInput, Platform, ReportLink, StoredFile } from '../lib/types'
 
 type FormState = Partial<CarInput>
+
+const UPLOAD_CONCURRENCY = 3
 
 const EMPTY: FormState = {
   title: '',
@@ -57,6 +60,7 @@ export function CarFormPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
   const photoInput = useRef<HTMLInputElement>(null)
   const reportInput = useRef<HTMLInputElement>(null)
 
@@ -90,44 +94,67 @@ export function CarFormPage() {
     return draft.id
   }
 
-  async function onPhotos(files: FileList | null) {
-    if (!files?.length) return
-    setUploading(true)
-    setError(null)
-    try {
-      const carId = await ensureId()
-      const uploaded: StoredFile[] = []
-      for (const file of Array.from(files)) {
-        uploaded.push(await api.uploadPhoto(carId, file))
-      }
-      const next = [...(form.photos ?? []), ...uploaded]
-      set('photos', next)
-      await updateCar(carId, { photos: next })
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Не удалось загрузить фото')
-    } finally {
-      setUploading(false)
-      if (photoInput.current) photoInput.current.value = ''
-    }
-  }
+  /**
+   * Файлы грузятся втроём параллельно и записываются в карточку одной пачкой.
+   * Осечка одного файла не отменяет остальные — его имя показывается отдельно.
+   */
+  async function runUploads(fileList: FileList | null, field: 'photos' | 'report_files') {
+    if (!fileList?.length) return
+    const files = Array.from(fileList)
 
-  async function onReports(files: FileList | null) {
-    if (!files?.length) return
     setUploading(true)
     setError(null)
+    setProgress({ done: 0, total: files.length })
+
+    const failed: string[] = []
+    const uploaded: StoredFile[] = []
+
     try {
       const carId = await ensureId()
-      const uploaded: StoredFile[] = []
-      for (const file of Array.from(files)) {
-        uploaded.push(await api.uploadReport(carId, file))
+      const existing = (form[field] ?? []) as StoredFile[]
+      let cursor = 0
+      let done = 0
+
+      const worker = async () => {
+        while (cursor < files.length) {
+          const file = files[cursor]
+          cursor += 1
+          try {
+            if (field === 'photos') {
+              uploaded.push(await api.uploadPhoto(carId, await compressImage(file)))
+            } else {
+              uploaded.push(await api.uploadReport(carId, file))
+            }
+          } catch {
+            failed.push(file.name)
+          } finally {
+            done += 1
+            setProgress({ done, total: files.length })
+          }
+        }
       }
-      const next = [...(form.report_files ?? []), ...uploaded]
-      set('report_files', next)
-      await updateCar(carId, { report_files: next })
+
+      await Promise.all(
+        Array.from({ length: Math.min(UPLOAD_CONCURRENCY, files.length) }, worker),
+      )
+
+      if (uploaded.length > 0) {
+        const next = [...existing, ...uploaded]
+        setForm((prev) => ({ ...prev, [field]: next }))
+        await updateCar(carId, { [field]: next })
+      }
+
+      if (failed.length > 0) {
+        setError(
+          `Не загрузились файлы: ${failed.join(', ')}. Добавь их ещё раз, остальные уже сохранены.`,
+        )
+      }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Не удалось загрузить файл отчёта')
+      setError(e instanceof Error ? e.message : 'Не удалось загрузить файлы')
     } finally {
       setUploading(false)
+      setProgress(null)
+      if (photoInput.current) photoInput.current.value = ''
       if (reportInput.current) reportInput.current.value = ''
     }
   }
@@ -532,9 +559,14 @@ export function CarFormPage() {
             type="file"
             accept="application/pdf,image/*"
             multiple
-            onChange={(e) => void onReports(e.target.files)}
+            onChange={(e) => void runUploads(e.target.files, 'report_files')}
             className="block w-full text-[13px] file:mr-3 file:rounded-[var(--radius-control)] file:border file:border-line file:bg-card file:px-3 file:py-1.5 file:text-[13px]"
           />
+          {progress && (
+            <p className="tnum mt-2 text-[13px] text-ink-soft">
+              Загружаю: {progress.done} из {progress.total}
+            </p>
+          )}
           {(form.report_files ?? []).length > 0 && (
             <ul className="mt-2 space-y-1">
               {(form.report_files ?? []).map((f) => (
@@ -561,10 +593,14 @@ export function CarFormPage() {
             type="file"
             accept="image/*"
             multiple
-            onChange={(e) => void onPhotos(e.target.files)}
+            onChange={(e) => void runUploads(e.target.files, 'photos')}
             className="block w-full text-[13px] file:mr-3 file:rounded-[var(--radius-control)] file:border file:border-line file:bg-card file:px-3 file:py-1.5 file:text-[13px]"
           />
-          {uploading && <p className="mt-2 text-[13px] text-ink-soft">Загружаю файлы…</p>}
+          {progress && (
+            <p className="tnum mt-2 text-[13px] text-ink-soft">
+              Загружаю: {progress.done} из {progress.total}
+            </p>
+          )}
           {(form.photos ?? []).length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
               {(form.photos ?? []).map((p) => (
