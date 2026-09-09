@@ -78,9 +78,9 @@ export function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-[24px] font-extrabold leading-tight">Настройки</h1>
+      <h1 className="text-[20px] font-extrabold leading-tight sm:text-[24px]">Настройки</h1>
 
-      <section className="card-surface p-5">
+      <section className="card-surface p-4 sm:p-5">
         <SectionTitle>Резервная копия</SectionTitle>
         <p className="text-[14px] leading-relaxed text-ink-soft">
           Выгрузка сохраняет все карточки в один JSON-файл. Фото и файлы отчётов остаются в
@@ -115,7 +115,7 @@ export function SettingsPage() {
         {status && <p className="mt-3 text-[14px]">{status}</p>}
       </section>
 
-      <section className="card-surface p-5">
+      <section className="card-surface p-4 sm:p-5">
         <SectionTitle>Доступ для родных</SectionTitle>
         <p className="text-[14px] leading-relaxed text-ink-soft">
           Отправь им обычную ссылку на сайт. При первом заходе человек выберет имя, и оно будет

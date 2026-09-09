@@ -33,7 +33,7 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="card-surface p-5">
+    <section className="card-surface p-4 sm:p-5">
       <SectionTitle>{title}</SectionTitle>
       {children}
     </section>
@@ -158,26 +158,35 @@ export function CarDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <Link to="/" className="text-[13px] text-ink-soft hover:text-ink">
             ← К списку
           </Link>
-          <h1 className="mt-1 text-[24px] font-extrabold leading-tight">{car.title}</h1>
-          <p className="tnum mt-1 text-[22px] font-bold">{formatPrice(car.price)}</p>
+          <h1 className="mt-1 text-[20px] font-extrabold leading-tight sm:text-[24px]">
+            {car.title}
+          </h1>
+          <p className="tnum mt-1 text-[20px] font-bold sm:text-[22px]">{formatPrice(car.price)}</p>
         </div>
 
         {isOwner && (
-          <div className="flex gap-2">
-            <Link to={`/car/${car.id}/edit`}>
-              <Button variant="primary">Редактировать</Button>
+          <div className="flex w-full gap-2 sm:w-auto">
+            <Link to={`/car/${car.id}/edit`} className="flex-1 sm:flex-none">
+              <Button variant="primary" className="w-full">
+                Изменить
+              </Button>
             </Link>
             <Button
+              className="flex-1 sm:flex-none"
               onClick={() => void updateCar(car.id, { archived: !car.archived })}
               disabled={busy}
             >
-              {car.archived ? 'Вернуть из архива' : 'В архив'}
+              {car.archived ? 'Из архива' : 'В архив'}
             </Button>
-            <Button variant="danger" onClick={() => void removeCar()}>
+            <Button
+              variant="danger"
+              className="flex-1 sm:flex-none"
+              onClick={() => void removeCar()}
+            >
               Удалить
             </Button>
           </div>
@@ -195,8 +204,8 @@ export function CarDetailPage() {
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="space-y-6">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="min-w-0 space-y-5">
           <PhotoGallery photos={car.photos} title={car.title} />
 
           <Block title="Характеристики">
@@ -311,7 +320,7 @@ export function CarDetailPage() {
           <ReviewsBlock carId={car.id} reviews={carReviews} onChanged={refreshReviews} />
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-5">
           <Block title="Статус">
             {isOwner ? (
               <StatusSwitcher car={car} onChange={(s) => void setStatus(s)} />

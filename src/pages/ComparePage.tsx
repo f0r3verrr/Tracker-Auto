@@ -127,7 +127,7 @@ export function ComparePage() {
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-[24px] font-extrabold leading-tight">Сравнение</h1>
+        <h1 className="text-[20px] font-extrabold leading-tight sm:text-[24px]">Сравнение</h1>
         <Button onClick={clear}>Очистить выбор</Button>
       </div>
 

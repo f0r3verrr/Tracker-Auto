@@ -113,11 +113,13 @@ export function CarCard({
         <div className="flex items-start justify-between gap-3">
           <Link
             to={`/car/${car.id}`}
-            className="text-[15px] font-semibold leading-snug hover:text-accent"
+            className="min-w-0 text-[15px] font-semibold leading-snug break-words hover:text-accent"
           >
             {car.title}
           </Link>
-          <RatingChip value={rating} />
+          <span className="shrink-0">
+            <RatingChip value={rating} />
+          </span>
         </div>
 
         <p className="tnum text-[20px] font-bold leading-none">{formatPrice(car.price)}</p>

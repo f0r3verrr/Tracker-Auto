@@ -60,7 +60,7 @@ export function CarsListPage() {
         onPickStatus={pickStatus}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+      <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
         <div className={cx('lg:block', filtersOpen ? 'block' : 'hidden')}>
           <FiltersPanel
             filters={filters}
@@ -70,7 +70,7 @@ export function CarsListPage() {
           />
         </div>
 
-        <div>
+        <div className="min-w-0">
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <Button
               size="sm"
@@ -95,14 +95,14 @@ export function CarsListPage() {
 
             {selected.length > 0 && (
               <div className="ml-auto flex items-center gap-2">
-                <span className="tnum text-[13px] text-ink-soft">
+                <span className="tnum hidden text-[13px] text-ink-soft sm:inline">
                   Выбрано {selected.length} из {MAX_COMPARE}
                 </span>
                 <Button size="sm" variant="ghost" onClick={clear}>
                   Снять
                 </Button>
                 <Button size="sm" variant="primary" onClick={() => navigate('/compare')}>
-                  Сравнить
+                  Сравнить ({selected.length})
                 </Button>
               </div>
             )}
@@ -128,7 +128,7 @@ export function CarsListPage() {
             />
           ) : (
             <>
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
                 {visible.map((car) => {
                   const carReviews = reviews.filter((r) => r.car_id === car.id)
                   return (

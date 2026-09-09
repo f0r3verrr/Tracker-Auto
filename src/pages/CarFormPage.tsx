@@ -42,7 +42,7 @@ function toNum(value: string): number | null {
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="card-surface p-5">
+    <section className="card-surface p-4 sm:p-5">
       <SectionTitle>{title}</SectionTitle>
       <div className="grid gap-4 sm:grid-cols-2">{children}</div>
     </section>
@@ -222,19 +222,28 @@ export function CarFormPage() {
   return (
     <form onSubmit={submit} className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <Link to={id ? `/car/${id}` : '/'} className="text-[13px] text-ink-soft hover:text-ink">
             ← Назад
           </Link>
-          <h1 className="mt-1 text-[24px] font-extrabold leading-tight">
+          <h1 className="mt-1 text-[20px] font-extrabold leading-tight sm:text-[24px]">
             {id ? 'Редактирование' : 'Новая машина'}
           </h1>
         </div>
-        <div className="flex gap-2">
-          <Button type="button" onClick={() => navigate(id ? `/car/${id}` : '/')}>
+        <div className="flex w-full gap-2 sm:w-auto">
+          <Button
+            type="button"
+            className="flex-1 sm:flex-none"
+            onClick={() => navigate(id ? `/car/${id}` : '/')}
+          >
             Отмена
           </Button>
-          <Button type="submit" variant="primary" disabled={saving || uploading}>
+          <Button
+            type="submit"
+            variant="primary"
+            className="flex-1 sm:flex-none"
+            disabled={saving || uploading}
+          >
             {saving ? 'Сохраняю' : 'Сохранить'}
           </Button>
         </div>
@@ -519,12 +528,12 @@ export function CarFormPage() {
           <span className="field-label">Ссылки на отчёты</span>
           <div className="space-y-2">
             {(form.report_links ?? []).map((link, i) => (
-              <div key={i} className="flex gap-2">
+              <div key={i} className="flex flex-wrap gap-2 sm:flex-nowrap">
                 <Input
                   value={link.label ?? ''}
                   onChange={(e) => editLink(i, { label: e.target.value })}
                   placeholder="Автотека"
-                  className="max-w-40"
+                  className="sm:max-w-40"
                 />
                 <Input
                   value={link.url}
@@ -702,11 +711,20 @@ export function CarFormPage() {
         </div>
       </Group>
 
-      <div className="flex justify-end gap-2 pb-4">
-        <Button type="button" onClick={() => navigate(id ? `/car/${id}` : '/')}>
+      <div className="flex gap-2 pb-4 sm:justify-end">
+        <Button
+          type="button"
+          className="flex-1 sm:flex-none"
+          onClick={() => navigate(id ? `/car/${id}` : '/')}
+        >
           Отмена
         </Button>
-        <Button type="submit" variant="primary" disabled={saving || uploading}>
+        <Button
+          type="submit"
+          variant="primary"
+          className="flex-1 sm:flex-none"
+          disabled={saving || uploading}
+        >
           {saving ? 'Сохраняю' : 'Сохранить'}
         </Button>
       </div>

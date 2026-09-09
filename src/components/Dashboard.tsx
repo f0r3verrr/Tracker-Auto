@@ -117,14 +117,14 @@ export function Dashboard({
   const unseen = reviews.filter((r) => !r.owner_seen)
 
   return (
-    <section className="card-surface mb-6 p-5">
-      <div className="grid gap-6 lg:grid-cols-[1fr_auto]">
-        <div>
+    <section className="card-surface mb-5 p-4 sm:p-5">
+      <div className="grid gap-5 lg:grid-cols-[1fr_auto]">
+        <div className="min-w-0">
           <h1 className="mb-4 text-[15px] font-semibold">Воронка подбора</h1>
           <Funnel cars={active} activeStatuses={activeStatuses} onPick={onPickStatus} />
         </div>
 
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4 border-line lg:border-l lg:pl-6">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4 border-t border-line pt-4 sm:gap-x-8 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
           <Stat label="В работе" value={String(active.length)} />
           <Stat
             label="Средняя цена"
@@ -152,10 +152,10 @@ export function Dashboard({
               <li key={car.id}>
                 <Link
                   to={`/car/${car.id}`}
-                  className="inline-flex items-center gap-2 rounded-[var(--radius-control)] border border-line px-2.5 py-1.5 text-[13px] hover:border-accent hover:text-accent"
+                  className="inline-flex max-w-full items-center gap-2 rounded-[var(--radius-control)] border border-line px-2.5 py-1.5 text-[13px] hover:border-accent hover:text-accent"
                 >
-                  {car.title}
-                  <span className="tnum text-ink-faint">{formatPrice(car.price)}</span>
+                  <span className="truncate">{car.title}</span>
+                  <span className="tnum shrink-0 text-ink-faint">{formatPrice(car.price)}</span>
                 </Link>
               </li>
             ))}

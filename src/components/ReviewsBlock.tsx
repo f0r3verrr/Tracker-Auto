@@ -92,7 +92,7 @@ export function ReviewsBlock({
   }
 
   return (
-    <section className="card-surface p-5">
+    <section className="card-surface p-4 sm:p-5">
       <SectionTitle
         action={
           average !== null ? (
