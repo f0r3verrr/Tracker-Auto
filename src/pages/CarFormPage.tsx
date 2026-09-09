@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Button, Checkbox, Field, Input, Select, SectionTitle, Spinner, cx } from '../components/ui'
+import {
+  Button,
+  Checkbox,
+  Field,
+  Input,
+  Select,
+  SectionTitle,
+  Spinner,
+  Textarea,
+  cx,
+} from '../components/ui'
 import { useCars } from '../context/CarsContext'
 import * as api from '../lib/api'
 import {
@@ -64,8 +74,12 @@ export function CarFormPage() {
   const photoInput = useRef<HTMLInputElement>(null)
   const reportInput = useRef<HTMLInputElement>(null)
 
+  // Подставляем данные из базы только при первом открытии. Иначе любое обновление
+  // списка (например, после создания черновика под фото) затирало бы то, что уже набрано.
+  const hydrated = useRef(false)
   useEffect(() => {
-    if (!existing) return
+    if (!existing || hydrated.current) return
+    hydrated.current = true
     const { id: _id, created_at: _c, updated_at: _u, price_history: _p, ...rest } = existing
     setForm(rest)
     setTagsText(existing.tags.join(', '))
@@ -83,13 +97,26 @@ export function CarFormPage() {
 
   if (loading && id) return <Spinner label="Загружаю карточку" />
 
+  function payload(): Partial<CarInput> {
+    return {
+      ...form,
+      title: form.title?.trim() || 'Без названия',
+      tags: tagsText
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
+      report_links: (form.report_links ?? []).filter((l) => l.url.trim()),
+    }
+  }
+
   /**
    * Файлы кладутся в Storage сразу, поэтому новой машине нужен id до загрузки.
-   * Черновик создаётся один раз и дальше правится.
+   * Черновик сохраняет всё уже введённое: иначе набранное до фото пропадало бы.
    */
   async function ensureId(): Promise<string> {
     if (id) return id
-    const draft = await createCar({ title: form.title?.trim() || 'Без названия', status: 'new' })
+    hydrated.current = true
+    const draft = await createCar(payload())
     navigate(`/car/${draft.id}/edit`, { replace: true })
     return draft.id
   }
@@ -194,22 +221,14 @@ export function CarFormPage() {
     setSaving(true)
     setError(null)
 
-    const payload: Partial<CarInput> = {
-      ...form,
-      title: form.title.trim(),
-      tags: tagsText
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean),
-      report_links: (form.report_links ?? []).filter((l) => l.url.trim()),
-    }
+    const values = payload()
 
     try {
       if (id) {
-        await updateCar(id, payload)
+        await updateCar(id, values)
         navigate(`/car/${id}`)
       } else {
-        const car = await createCar(payload)
+        const car = await createCar(values)
         navigate(`/car/${car.id}`)
       }
     } catch (e) {
@@ -322,6 +341,21 @@ export function CarFormPage() {
             className="tnum"
             value={form.price ?? ''}
             onChange={(e) => set('price', toNum(e.target.value))}
+          />
+        </Field>
+      </Group>
+
+      <Group title="Заметки">
+        <Field
+          label="Свободный текст"
+          hint="Всё, чему не нашлось отдельного поля: условия скидки, договорённости, что спросить у продавца."
+          className="sm:col-span-2"
+        >
+          <Textarea
+            value={form.notes ?? ''}
+            onChange={(e) => set('notes', e.target.value || null)}
+            rows={5}
+            placeholder="Дополнительная скидка по программе Трейд-ин до 100 000 ₽"
           />
         </Field>
       </Group>

@@ -33,6 +33,7 @@ export interface Car {
   owners_count: number | null
   tax: number | null
   condition: string | null
+  notes: string | null
   pts: string | null
   customs: string | null
   exchange: string | null

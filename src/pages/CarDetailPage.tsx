@@ -208,6 +208,13 @@ export function CarDetailPage() {
         <div className="min-w-0 space-y-5">
           <PhotoGallery photos={car.photos} title={car.title} />
 
+          {car.notes && (
+            <Block title="Заметки">
+              {/* Переносы строк сохраняем как есть: текст пишется вручную и структура в нём осмысленная */}
+              <p className="whitespace-pre-wrap text-[14px] leading-relaxed">{car.notes}</p>
+            </Block>
+          )}
+
           <Block title="Характеристики">
             <dl>
               <Row label="Год выпуска" value={car.year} />
